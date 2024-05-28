@@ -11,7 +11,8 @@ def get_all_deal_info():
         deals = bitrix.get_all('crm.deal.list', params={
             'select': ['ID'],
             'filter': {
-                'CLOSED': 'N'  # Все открытые сделки
+                'CLOSED': 'N',  # Все открытые сделки
+                'CATEGORY_ID': ['1', '11', '13', '15', '19', '29', '31', '35', '37']  # Все воронки Касымовой
             }
         })
         return deals
@@ -24,7 +25,6 @@ def get_tasks_for_deal(deal_id):
         deals = bitrix.get_all('tasks.task.list', params={
             'select': ['ID', 'TITLE'],
             'filter': {
-                'STATUS': ['2', '3', '6'],
                 'UF_CRM_TASK': 'D_' + str(deal_id)
             }
         })
@@ -62,15 +62,22 @@ def create_bitrix_task_os(deal_id):
 def main():
     """ Функция запускающая проверку наличия задач в активных сделках Битрикса"""
     all_deals = get_all_deal_info()
+    active_statuses = ['2', '3', '4', '6']  # Список активных статусов
+    
     for deal in all_deals:
         company_id = deal['ID']
         tasks = get_tasks_for_deal(company_id)
 
-        if not tasks:  # Если список задач пуст
-            create_bitrix_task_os(company_id)  # Создание новую задачи
-            print(f'Создание новой задачи для сделки {company_id}')
+                if not tasks:  # Если список задач пуст
+            # create_bitrix_task_os(company_id)  # Создание новую задачи
+            print(f'Создание новой задачи для сделки {company_id} где не было задач')
         else:
-            pass
+            for task in tasks:
+                if task['status'] in active_statuses:  # Если статусы, кроме "завершена"
+                    break  # Задача найдена, выходим из цикла
+            else:  # Если цикл завершился без break, значит задач с активнми статусами нет
+                # create_bitrix_task_os(company_id)  # Создание новую задачи
+                print(f'Создание новой задачи для сделки {company_id} с завершенными задачами')
 
 
 if __name__ == '__main__':
