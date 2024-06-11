@@ -68,7 +68,7 @@ def main():
         company_id = deal['ID']
         tasks = get_tasks_for_deal(company_id)
 
-                if not tasks:  # Если список задач пуст
+        if not tasks:  # Если список задач пуст
             # create_bitrix_task_os(company_id)  # Создание новую задачи
             print(f'Создание новой задачи для сделки {company_id} где не было задач')
         else:
